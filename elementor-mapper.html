@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elementor Mapper — Siana Digital</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
+<style>
+:root {
+  --navy: #0B1C3F;
+  --gold: #C4972A;
+  --blue: #1A3A6E;
+  --gray-50: #F8F9FB;
+  --gray-100: #F1F3F7;
+  --gray-200: #E2E6EE;
+  --gray-400: #9AABBC;
+  --gray-600: #5A6A7A;
+  --gray-800: #2C3A4A;
+  --white: #FFFFFF;
+  --success: #1E7B4B;
+  --success-bg: #EBF7F1;
+  --radius: 10px;
+  --shadow: 0 2px 12px rgba(11,28,63,0.08);
+  --shadow-md: 0 4px 24px rgba(11,28,63,0.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--gray-50);color:var(--gray-800);font-size:14px;line-height:1.5;}
+a{color:inherit;text-decoration:none;}
+
+/* HEADER */
+.header{background:var(--navy);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.header-logo{display:flex;align-items:center;gap:10px;color:white;}
+.logo-mark{width:32px;height:32px;background:var(--gold);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:var(--navy);}
+.logo-text{font-size:14px;font-weight:600;color:white;opacity:0.9;}
+.header-actions{display:flex;align-items:center;gap:10px;}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:1fr 380px;height:calc(100vh - 56px);}
+.left-panel{display:flex;flex-direction:column;overflow:hidden;}
+.right-panel{background:white;border-left:1px solid var(--gray-200);display:flex;flex-direction:column;overflow:hidden;}
+
+/* UPLOAD */
+#upload-screen{display:flex;align-items:center;justify-content:center;flex:1;padding:40px;}
+.upload-box{max-width:480px;width:100%;text-align:center;}
+.upload-drop{border:2px dashed var(--gray-200);border-radius:16px;padding:48px 32px;cursor:pointer;transition:all 0.2s;background:white;}
+.upload-drop:hover,.upload-drop.drag{border-color:var(--gold);background:rgba(196,151,42,0.04);}
+.upload-drop i{font-size:40px;color:var(--gray-400);margin-bottom:16px;display:block;}
+.upload-drop h2{font-size:18px;font-weight:600;color:var(--gray-800);margin-bottom:8px;}
+.upload-drop p{font-size:13px;color:var(--gray-600);}
+.upload-drop input{display:none;}
+.btn-upload{display:inline-flex;align-items:center;gap:8px;margin-top:20px;padding:10px 24px;background:var(--gold);color:var(--navy);border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;transition:opacity 0.15s;}
+.btn-upload:hover{opacity:0.85;}
+
+/* SECTIONS LIST */
+#sections-screen{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.sections-toolbar{padding:12px 16px;border-bottom:1px solid var(--gray-200);background:white;display:flex;align-items:center;gap:10px;}
+.toolbar-file{font-size:13px;font-weight:500;color:var(--gray-800);display:flex;align-items:center;gap:6px;flex:1;}
+.toolbar-file i{color:var(--gold);}
+.badge{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500;}
+.badge-info{background:#EBF1FB;color:var(--blue);}
+.badge-success{background:var(--success-bg);color:var(--success);}
+.badge-warn{background:#FEF3E2;color:#B8650A;}
+
+.sections-list{flex:1;overflow-y:auto;padding:12px;}
+
+.sec-card{background:white;border:1px solid var(--gray-200);border-radius:var(--radius);margin-bottom:8px;overflow:hidden;transition:border-color 0.15s;}
+.sec-card.active{border-color:var(--gold);box-shadow:0 0 0 3px rgba(196,151,42,0.1);}
+.sec-card.mapped{border-color:var(--success);}
+
+.sec-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none;}
+.sec-header:hover{background:var(--gray-50);}
+.sec-num{width:24px;height:24px;border-radius:50%;background:var(--gray-100);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--gray-600);flex-shrink:0;}
+.sec-card.mapped .sec-num{background:var(--success-bg);color:var(--success);}
+.sec-title{flex:1;font-size:13px;font-weight:500;}
+.sec-widget-badge{font-size:11px;padding:2px 8px;border-radius:4px;background:var(--gray-100);color:var(--gray-600);}
+.sec-card.mapped .sec-widget-badge{background:var(--success-bg);color:var(--success);}
+.sec-chevron{color:var(--gray-400);transition:transform 0.15s;font-size:12px;}
+.sec-card.open .sec-chevron{transform:rotate(180deg);}
+
+.sec-preview{padding:0 14px 10px;font-size:12px;color:var(--gray-400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:none;}
+.sec-card.open .sec-preview{display:block;}
+
+/* EDITOR PANEL */
+.editor-empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--gray-400);padding:24px;text-align:center;}
+.editor-empty i{font-size:32px;}
+
+#editor-panel{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.editor-header{padding:14px 16px;border-bottom:1px solid var(--gray-200);background:var(--gray-50);}
+.editor-header h3{font-size:14px;font-weight:600;color:var(--gray-800);}
+.editor-header p{font-size:12px;color:var(--gray-400);margin-top:2px;}
+.editor-body{flex:1;overflow-y:auto;padding:16px;}
+.editor-footer{padding:12px 16px;border-top:1px solid var(--gray-200);background:white;}
+
+/* FORM */
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12px;font-weight:500;color:var(--gray-600);margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;padding:8px 10px;border:1px solid var(--gray-200);border-radius:7px;font-size:13px;font-family:inherit;color:var(--gray-800);background:white;transition:border-color 0.15s;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold);}
+.field textarea{height:80px;resize:vertical;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.color-field{display:flex;gap:8px;align-items:center;}
+.color-field input[type="color"]{width:36px;height:36px;padding:2px;border-radius:6px;cursor:pointer;border:1px solid var(--gray-200);flex-shrink:0;}
+.color-field input[type="text"]{flex:1;}
+.section-divider{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--gray-400);margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--gray-100);}
+
+/* WIDGET PICKER */
+.widget-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:4px;}
+.wbtn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:1px solid var(--gray-200);border-radius:8px;cursor:pointer;background:white;transition:all 0.12s;font-family:inherit;}
+.wbtn:hover{border-color:var(--gold);background:rgba(196,151,42,0.04);}
+.wbtn.sel{border-color:var(--gold);background:rgba(196,151,42,0.08);}
+.wbtn i{font-size:18px;color:var(--gray-600);}
+.wbtn.sel i{color:var(--gold);}
+.wbtn span{font-size:10px;color:var(--gray-600);text-align:center;line-height:1.3;}
+.wbtn.sel span{color:var(--gold);font-weight:500;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--gray-200);border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;background:white;color:var(--gray-800);transition:all 0.15s;font-family:inherit;}
+.btn:hover{background:var(--gray-50);}
+.btn-primary{background:var(--gold);border-color:var(--gold);color:var(--navy);}
+.btn-primary:hover{opacity:0.88;}
+.btn-danger{color:#B02A2A;border-color:#ECC5C5;}
+.btn-danger:hover{background:#FDF2F2;}
+.btn-full{width:100%;justify-content:center;}
+.btn-sm{padding:6px 10px;font-size:12px;}
+.btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+/* PROGRESS */
+.progress-section{padding:12px 16px;border-top:1px solid var(--gray-200);}
+.progress-label{display:flex;justify-content:space-between;font-size:12px;color:var(--gray-600);margin-bottom:6px;}
+.progress-bar{height:5px;background:var(--gray-100);border-radius:20px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--success);border-radius:20px;transition:width 0.3s;}
+
+/* MAPPED LIST */
+.mapped-section{padding:12px 16px;border-bottom:1px solid var(--gray-200);}
+.mapped-title{font-size:12px;font-weight:600;color:var(--gray-600);margin-bottom:8px;}
+.mapped-items{display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto;}
+.mapped-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;background:var(--gray-50);border:1px solid var(--gray-100);}
+.mapped-item i{color:var(--success);font-size:13px;}
+.mapped-item .mi-name{flex:1;font-size:12px;font-weight:500;color:var(--gray-800);}
+.mapped-item .mi-widget{font-size:11px;color:var(--gray-400);}
+.mapped-empty{font-size:12px;color:var(--gray-400);text-align:center;padding:12px 0;}
+
+/* PAGE SETTINGS */
+.page-settings{padding:12px 16px;border-bottom:1px solid var(--gray-200);}
+
+/* EXPORT */
+.export-section{padding:12px 16px;}
+
+/* HTML PREVIEW */
+.html-preview-wrap{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;overflow:hidden;margin-bottom:12px;}
+.html-preview-label{font-size:11px;font-weight:600;color:var(--gray-400);padding:6px 10px;border-bottom:1px solid var(--gray-200);background:white;text-transform:uppercase;letter-spacing:0.06em;}
+.html-preview{padding:10px;font-size:11px;color:var(--gray-600);line-height:1.6;max-height:90px;overflow:hidden;font-family:monospace;word-break:break-all;}
+
+/* HINT */
+.hint{font-size:11px;color:var(--gray-400);margin-top:4px;}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo">
+    <div class="logo-mark">SD</div>
+    <span class="logo-text">Elementor Mapper</span>
+  </div>
+  <div class="header-actions">
+    <span id="header-status" style="font-size:12px;color:rgba(255,255,255,0.5);"></span>
+    <button class="btn btn-sm" id="btn-reset" style="display:none;color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.15);" onclick="resetApp()">
+      <i class="fa-solid fa-arrow-left"></i> Nuevo archivo
+    </button>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- LEFT: Secciones -->
+  <div class="left-panel">
+    <!-- Upload -->
+    <div id="upload-screen">
+      <div class="upload-box">
+        <div class="upload-drop" id="drop-zone" onclick="document.getElementById('file-input').click()">
+          <i class="fa-solid fa-file-code"></i>
+          <h2>Sube tu HTML</h2>
+          <p>La app detecta las secciones y tú decides qué widget usa cada una en Elementor</p>
+          <button class="btn-upload" onclick="event.stopPropagation();document.getElementById('file-input').click()">
+            <i class="fa-solid fa-upload"></i> Seleccionar archivo HTML
+          </button>
+          <input type="file" id="file-input" accept=".html,.htm">
+        </div>
+        <p style="margin-top:16px;font-size:12px;color:var(--gray-400);">
+          Soporta páginas completas con CSS y JS inline. El archivo no se sube a ningún servidor.
+        </p>
+      </div>
+    </div>
+
+    <!-- Sections -->
+    <div id="sections-screen">
+      <div class="sections-toolbar">
+        <div class="toolbar-file">
+          <i class="fa-solid fa-file-code"></i>
+          <span id="file-label"></span>
+          <span id="sec-count-badge" class="badge badge-info"></span>
+        </div>
+      </div>
+      <div class="sections-list" id="sections-list"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Editor + Summary -->
+  <div class="right-panel">
+    <div class="editor-empty" id="editor-empty">
+      <i class="fa-solid fa-hand-pointer" style="color:var(--gray-200);"></i>
+      <div style="font-size:14px;font-weight:500;color:var(--gray-600);">Selecciona una sección</div>
+      <div style="font-size:12px;">Haz clic en cualquier sección de la izquierda para configurar su widget de Elementor</div>
+    </div>
+
+    <div id="editor-panel">
+      <div class="editor-header">
+        <h3 id="ed-title"></h3>
+        <p id="ed-subtitle"></p>
+      </div>
+      <div class="editor-body" id="editor-body"></div>
+      <div class="editor-footer">
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary btn-full" id="btn-map" onclick="confirmMapping()">
+            <i class="fa-solid fa-check"></i> Confirmar mapeo
+          </button>
+          <button class="btn btn-danger btn-sm" id="btn-unmap" style="display:none;" onclick="removeMapping()">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary & Export -->
+    <div class="mapped-section">
+      <div class="mapped-title">SECCIONES MAPEADAS</div>
+      <div class="mapped-items" id="mapped-items">
+        <div class="mapped-empty">Ninguna sección mapeada aún</div>
+      </div>
+    </div>
+
+    <div class="page-settings">
+      <div class="section-divider" style="margin-top:0;">Configuración de página</div>
+      <div class="field">
+        <label>Título de la página</label>
+        <input type="text" id="page-title" placeholder="Ej: Inicio — Mi empresa">
+      </div>
+      <div class="field">
+        <label>Tipo de plantilla</label>
+        <select id="page-type">
+          <option value="page">Página normal</option>
+          <option value="header">Header (Theme Builder)</option>
+          <option value="footer">Footer (Theme Builder)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-label">
+        <span id="progress-text">0 de 0 mapeadas</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="export-section">
+      <button class="btn btn-primary btn-full" id="btn-export" disabled onclick="exportJSON()">
+        <i class="fa-solid fa-download"></i> Exportar JSON para Elementor
+      </button>
+      <p class="hint" style="text-align:center;margin-top:8px;">Importa en Elementor → Mis plantillas → Importar plantilla</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ────────────────────────────────────────────────
+let sections = [];
+let mappings = {};
+let activeSec = null;
+
+// ── WIDGETS ─────────────────────────────────────────────
+const WIDGETS = [
+  {id:'heading',      icon:'fa-heading',         label:'Heading'},
+  {id:'text-editor',  icon:'fa-align-left',       label:'Text Editor'},
+  {id:'button',       icon:'fa-arrow-pointer',    label:'Button'},
+  {id:'image',        icon:'fa-image',            label:'Image'},
+  {id:'icon',         icon:'fa-star',             label:'Icon'},
+  {id:'icon-list',    icon:'fa-list',             label:'Icon List'},
+  {id:'icon-box',     icon:'fa-box',              label:'Icon Box'},
+  {id:'counter',      icon:'fa-hash',             label:'Counter'},
+  {id:'divider',      icon:'fa-minus',            label:'Divider'},
+  {id:'spacer',       icon:'fa-up-down',          label:'Spacer'},
+  {id:'accordion',    icon:'fa-bars',             label:'Accordion'},
+  {id:'testimonial',  icon:'fa-quote-left',       label:'Testimonial'},
+  {id:'video',        icon:'fa-play',             label:'Video'},
+  {id:'form',         icon:'fa-wpforms',          label:'Form'},
+  {id:'nav-menu',     icon:'fa-bars-staggered',   label:'Nav Menu'},
+  {id:'html',         icon:'fa-code',             label:'HTML widget'},
+];
+
+const WIDGET_FIELDS = {
+  heading: [
+    {k:'title',      l:'Texto del heading',  t:'textarea'},
+    {k:'tag',        l:'Etiqueta HTML',      t:'select', opts:['h1','h2','h3','h4','h5','h6']},
+    {k:'align',      l:'Alineación',         t:'select', opts:['left','center','right']},
+    {k:'color',      l:'Color del texto',    t:'color',  def:'#0B1C3F'},
+    {k:'font_family',l:'Fuente',             t:'select', opts:['Inter','Playfair Display','Georgia','Arial','system-ui']},
+    {k:'font_size',  l:'Tamaño (px)',        t:'number', def:'32'},
+    {k:'font_weight',l:'Peso',              t:'select', opts:['400','500','600','700','800']},
+    {k:'animation',  l:'Animación entrada',  t:'select', opts:['','fadeIn','fadeInUp','fadeInLeft','fadeInRight','zoomIn']},
+  ],
+  'text-editor': [
+    {k:'editor',     l:'Contenido HTML',     t:'textarea'},
+    {k:'align',      l:'Alineación',         t:'select', opts:['left','center','right']},
+    {k:'color',      l:'Color texto',        t:'color',  def:'#5A6A7A'},
+    {k:'font_family',l:'Fuente',             t:'select', opts:['Inter','Playfair Display','Georgia','Arial']},
+    {k:'font_size',  l:'Tamaño (px)',        t:'number', def:'16'},
+    {k:'font_weight',l:'Peso',              t:'select', opts:['400','500','600','700']},
+    {k:'animation',  l:'Animación',          t:'select', opts:['','fadeIn','fadeInUp','fadeInLeft']},
+  ],
+  button: [
+    {k:'text',       l:'Texto del botón',    t:'text'},
+    {k:'url',        l:'URL',                t:'text'},
+    {k:'bg_color',   l:'Color fondo',        t:'color',  def:'#C4972A'},
+    {k:'text_color', l:'Color texto',        t:'color',  def:'#0B1C3F'},
+    {k:'hover_bg',   l:'Hover fondo',        t:'color',  def:'#B8881F'},
+    {k:'border_radius',l:'Border radius (px)',t:'number',def:'8'},
+    {k:'size',       l:'Tamaño',             t:'select', opts:['xs','sm','md','lg','xl']},
+    {k:'icon',       l:'Icono FA (ej: fa-arrow-right)',t:'text'},
+    {k:'icon_align', l:'Posición icono',     t:'select', opts:['left','right']},
+    {k:'align',      l:'Alineación',         t:'select', opts:['left','center','right']},
+    {k:'animation',  l:'Animación',          t:'select', opts:['','fadeIn','fadeInUp']},
+  ],
+  image: [
+    {k:'url',        l:'URL de la imagen',   t:'text'},
+    {k:'alt',        l:'Texto alternativo',  t:'text'},
+    {k:'size',       l:'Tamaño Elementor',   t:'select', opts:['thumbnail','medium','large','full']},
+    {k:'width',      l:'Anchura (%)',        t:'number', def:'100'},
+  ],
+  icon: [
+    {k:'icon_value', l:'Icono FA (ej: fa-star)',t:'text'},
+    {k:'color',      l:'Color',              t:'color',  def:'#C4972A'},
+    {k:'size',       l:'Tamaño (px)',        t:'number', def:'32'},
+  ],
+  'icon-list': [
+    {k:'items',      l:'Items — una línea por item: icono|texto\n(ej: fa-check|Texto del item)',t:'textarea'},
+    {k:'icon_color', l:'Color iconos',       t:'color',  def:'#C4972A'},
+    {k:'text_color', l:'Color texto',        t:'color',  def:'#2C3A4A'},
+    {k:'icon_size',  l:'Tamaño icono (px)',  t:'number', def:'18'},
+    {k:'space',      l:'Espacio entre items (px)',t:'number',def:'20'},
+    {k:'layout',     l:'Layout',             t:'select', opts:['traditional','inline']},
+  ],
+  'icon-box': [
+    {k:'icon_value', l:'Icono FA (ej: fa-shield-halved)',t:'text'},
+    {k:'title',      l:'Título',             t:'text'},
+    {k:'description',l:'Descripción',        t:'textarea'},
+    {k:'icon_color', l:'Color icono',        t:'color',  def:'#C4972A'},
+    {k:'title_color',l:'Color título',       t:'color',  def:'#0B1C3F'},
+    {k:'desc_color', l:'Color descripción',  t:'color',  def:'#5A6A7A'},
+    {k:'position',   l:'Posición icono',     t:'select', opts:['top','left','right']},
+    {k:'text_align', l:'Alineación',         t:'select', opts:['left','center','right']},
+    {k:'animation',  l:'Animación',          t:'select', opts:['','fadeIn','fadeInUp']},
+  ],
+  counter: [
+    {k:'start',      l:'Número inicial',     t:'number', def:'0'},
+    {k:'end',        l:'Número final',       t:'number', def:'100'},
+    {k:'suffix',     l:'Sufijo (ej: +, %)',  t:'text'},
+    {k:'prefix',     l:'Prefijo',            t:'text'},
+    {k:'title',      l:'Label debajo',       t:'text'},
+    {k:'num_color',  l:'Color número',       t:'color',  def:'#C4972A'},
+    {k:'title_color',l:'Color label',        t:'color',  def:'#9AABBC'},
+    {k:'font_size',  l:'Tamaño número (px)', t:'number', def:'48'},
+    {k:'animation',  l:'Animación',          t:'select', opts:['','fadeInUp']},
+  ],
+  divider: [
+    {k:'color',      l:'Color',              t:'color',  def:'#C4972A'},
+    {k:'weight',     l:'Grosor (px)',        t:'number', def:'2'},
+    {k:'width',      l:'Anchura (px)',       t:'number', def:'60'},
+    {k:'align',      l:'Alineación',         t:'select', opts:['left','center','right']},
+  ],
+  spacer: [
+    {k:'height',     l:'Altura (px)',        t:'number', def:'40'},
+  ],
+  accordion: [
+    {k:'items',      l:'Items — una línea: título|contenido',t:'textarea'},
+    {k:'title_color',l:'Color títulos',      t:'color',  def:'#0B1C3F'},
+    {k:'title_active_color',l:'Color activo',t:'color', def:'#C4972A'},
+  ],
+  testimonial: [
+    {k:'content',    l:'Cita (sin comillas)',t:'textarea'},
+    {k:'name',       l:'Nombre',             t:'text'},
+    {k:'job',        l:'Cargo / empresa',    t:'text'},
+    {k:'img_url',    l:'URL foto (opcional)',t:'text'},
+    {k:'animation',  l:'Animación',          t:'select', opts:['','fadeIn','fadeInUp']},
+  ],
+  video: [
+    {k:'url',        l:'URL YouTube/Vimeo',  t:'text'},
+    {k:'autoplay',   l:'Autoplay',           t:'select', opts:['yes','no']},
+  ],
+  form: [
+    {k:'form_name',  l:'Nombre del formulario',t:'text'},
+    {k:'fields',     l:'Campos: tipo|label (un campo por línea)\ntipos: text,email,tel,textarea,select',t:'textarea'},
+    {k:'btn_text',   l:'Texto del botón',    t:'text',   def:'Enviar'},
+  ],
+  'nav-menu': [
+    {k:'menu_id',    l:'ID del menú WordPress',t:'text'},
+    {k:'layout',     l:'Layout',             t:'select', opts:['horizontal','vertical','dropdown']},
+  ],
+  html: [
+    {k:'html',       l:'Código HTML',        t:'textarea'},
+  ],
+};
+
+// ── UTILS ────────────────────────────────────────────────
+function uid(){return Math.random().toString(16).slice(2,10);}
+function px(v){return {unit:'px',size:Number(v),sizes:[]};}
+function pad(str){const[t=0,r=0,b=0,l=0]=String(str).trim().split(/\s+/).map(Number);return{unit:'px',top:String(t),right:String(r),bottom:String(b),left:String(l),isLinked:false};}
+function gap(c,r=0){return{unit:'px',size:Number(c),column:String(c),row:String(r)};}
+
+// ── PARSE HTML ───────────────────────────────────────────
+function extractSections(html){
+  const parser=new DOMParser();
+  const doc=parser.parseFromString(html,'text/html');
+  const found=[];
+  const seen=new Set();
+
+  function depth(el){let d=0,p=el;while(p.parentElement){d++;p=p.parentElement;}return d;}
+  function text(el){return el.textContent.replace(/\s+/g,' ').trim().slice(0,200);}
+  function guessLabel(tag,cls,id,txt){
+    const s=(cls+' '+id+' '+txt).toLowerCase();
+    if(tag==='nav'||s.includes('navbar')||s.includes('nav-'))return'Navbar / Menú';
+    if(s.includes('hero'))return'Hero';
+    if(tag==='header')return'Header';
+    if(tag==='footer'||s.includes('footer'))return'Footer';
+    if(s.includes('servicio')||s.includes('service'))return'Servicios';
+    if(s.includes('nosotros')||s.includes('about')||s.includes('presentac'))return'Sobre nosotros';
+    if(s.includes('stat')||s.includes('counter')||s.includes('número'))return'Estadísticas';
+    if(s.includes('testimoni')||s.includes('review'))return'Testimonios';
+    if(s.includes('contacto')||s.includes('contact'))return'Contacto';
+    if(s.includes('faq')||s.includes('pregunta'))return'FAQ';
+    if(s.includes('equipo')||s.includes('team'))return'Equipo';
+    if(s.includes('precio')||s.includes('pricing'))return'Precios';
+    if(s.includes('cta')||s.includes('call-to-action'))return'CTA';
+    if(s.includes('blog')||s.includes('noticia')||s.includes('news'))return'Blog / Noticias';
+    if(s.includes('feature')||s.includes('caracteristic'))return'Features';
+    if(s.includes('partner')||s.includes('client')||s.includes('logo'))return'Logos / Clientes';
+    if(tag==='section')return'Sección';
+    if(tag==='article')return'Artículo';
+    if(tag==='main')return'Contenido principal';
+    return tag.charAt(0).toUpperCase()+tag.slice(1);
+  }
+
+  const selectors=['nav','header','footer','main','section','article',
+    'div[class*="hero"]','div[class*="stats"]','div[class*="services"]',
+    'div[class*="testimonial"]','div[class*="cta"]','div[class*="about"]',
+    'div[class*="contact"]','div[class*="features"]','div[class*="pricing"]'];
+
+  selectors.forEach(sel=>{
+    try{
+      doc.querySelectorAll(sel).forEach(el=>{
+        if(seen.has(el))return;
+        if(depth(el)>4)return;
+        const t=text(el);
+        if(t.length<10&&el.children.length===0)return;
+        seen.add(el);
+        const tag=el.tagName.toLowerCase();
+        const cls=el.className||'';
+        const id=el.id||'';
+        found.push({
+          id:uid(),tag,cls,eid:id,
+          text:t,
+          html:el.outerHTML.slice(0,800),
+          label:guessLabel(tag,cls,id,t),
+        });
+      });
+    }catch(e){}
+  });
+
+  // Dedup by content proximity
+  return found.slice(0,50);
+}
+
+// ── RENDER SECTIONS LIST ─────────────────────────────────
+function renderSections(){
+  const list=document.getElementById('sections-list');
+  list.innerHTML='';
+  sections.forEach((sec,i)=>{
+    const m=mappings[sec.id];
+    const wLabel=m?WIDGETS.find(w=>w.id===m.widget)?.label||m.widget:'';
+    const card=document.createElement('div');
+    card.className='sec-card'+(m?' mapped':'')+(activeSec===sec.id?' active':'');
+    card.id='sec-card-'+sec.id;
+    card.innerHTML=`
+      <div class="sec-header" onclick="openSection('${sec.id}')">
+        <div class="sec-num">${m?'<i class="fa-solid fa-check" style="font-size:10px;"></i>':(i+1)}</div>
+        <div class="sec-title">${escHtml(sec.label)}</div>
+        <div class="sec-widget-badge">${m?wLabel:sec.tag}</div>
+        <i class="fa-solid fa-chevron-down sec-chevron"></i>
+      </div>
+      <div class="sec-preview">${escHtml(sec.text)}</div>
+    `;
+    card.querySelector('.sec-header').addEventListener('click',()=>{
+      card.classList.toggle('open');
+    });
+    list.appendChild(card);
+  });
+  updateProgress();
+  updateMappedList();
+}
+
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── OPEN SECTION IN EDITOR ───────────────────────────────
+function openSection(secId){
+  activeSec=secId;
+  const sec=sections.find(s=>s.id===secId);
+  const m=mappings[secId];
+
+  // Update cards active state
+  document.querySelectorAll('.sec-card').forEach(c=>c.classList.remove('active'));
+  const card=document.getElementById('sec-card-'+secId);
+  if(card){card.classList.add('active');card.classList.add('open');}
+
+  document.getElementById('editor-empty').style.display='none';
+  const ep=document.getElementById('editor-panel');
+  ep.style.display='flex';
+
+  document.getElementById('ed-title').textContent=sec.label;
+  document.getElementById('ed-subtitle').textContent=`<${sec.tag}>${sec.cls?' · '+sec.cls.split(' ').slice(0,3).join(' '):''}`;
+  document.getElementById('btn-unmap').style.display=m?'':'none';
+  document.getElementById('btn-map').innerHTML=m?'<i class="fa-solid fa-rotate"></i> Actualizar mapeo':'<i class="fa-solid fa-check"></i> Confirmar mapeo';
+
+  renderEditor(sec, m);
+}
+
+// ── RENDER EDITOR BODY ───────────────────────────────────
+function renderEditor(sec, existing){
+  const body=document.getElementById('editor-body');
+  const selWidget=existing?.widget||'';
+  const selFields=existing?.fields||{};
+  const bgColor=existing?.bg_color||'#FFFFFF';
+  const padding=existing?.padding||'80 60 80 60';
+  const layout=existing?.layout||'column';
+  const minH=existing?.min_height||'';
+
+  let html=`
+    <div class="html-preview-wrap">
+      <div class="html-preview-label">HTML detectado</div>
+      <div class="html-preview">${escHtml(sec.html)}</div>
+    </div>
+
+    <div class="section-divider">Nombre de la sección</div>
+    <div class="field">
+      <label>Editar nombre</label>
+      <input type="text" id="ed-sec-label" value="${escHtml(sec.label)}">
+    </div>
+
+    <div class="section-divider">Container (sección)</div>
+    <div class="field">
+      <label>Color de fondo</label>
+      <div class="color-field">
+        <input type="color" id="ed-bg-picker" value="${bgColor}" oninput="document.getElementById('ed-bg-text').value=this.value">
+        <input type="text" id="ed-bg-text" value="${bgColor}" oninput="document.getElementById('ed-bg-picker').value=this.value">
+      </div>
+    </div>
+    <div class="field">
+      <label>Padding (top right bottom left, en px)</label>
+      <input type="text" id="ed-padding" value="${padding}" placeholder="80 60 80 60">
+      <div class="hint">Ej: 100 60 100 60</div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Dirección flex</label>
+        <select id="ed-direction">
+          <option value="column" ${layout==='column'?'selected':''}>column (vertical)</option>
+          <option value="row" ${layout==='row'?'selected':''}>row (horizontal)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Min-height (px, opcional)</label>
+        <input type="number" id="ed-minheight" value="${minH}" placeholder="">
+      </div>
+    </div>
+
+    <div class="section-divider">Widget principal</div>
+    <div class="widget-grid" id="widget-grid">
+  `;
+
+  WIDGETS.forEach(w=>{
+    html+=`<button class="wbtn${selWidget===w.id?' sel':''}" data-wid="${w.id}" onclick="selectWidget('${w.id}',this)">
+      <i class="fa-solid ${w.icon}"></i>
+      <span>${w.label}</span>
+    </button>`;
+  });
+
+  html+=`</div><div id="widget-fields">`;
+  html+=renderWidgetFields(selWidget, selFields);
+  html+=`</div>`;
+
+  body.innerHTML=html;
+}
+
+function selectWidget(wid, btn){
+  document.querySelectorAll('#widget-grid .wbtn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  const sec=sections.find(s=>s.id===activeSec);
+  const existing=mappings[activeSec]?.fields||{};
+  document.getElementById('widget-fields').innerHTML=renderWidgetFields(wid, existing);
+}
+
+function renderWidgetFields(wid, existing){
+  if(!wid)return'';
+  const fields=WIDGET_FIELDS[wid];
+  if(!fields||!fields.length)return'';
+  let html=`<div class="section-divider">Configurar widget: ${WIDGETS.find(w=>w.id===wid)?.label||wid}</div>`;
+  fields.forEach(f=>{
+    const val=existing[f.k]!==undefined?existing[f.k]:(f.def||'');
+    const id=`ef-${f.k}`;
+    html+=`<div class="field"><label>${f.l}</label>`;
+    if(f.t==='textarea'){
+      html+=`<textarea id="${id}">${escHtml(val)}</textarea>`;
+    } else if(f.t==='select'){
+      html+=`<select id="${id}">${f.opts.map(o=>`<option value="${o}"${val===o?' selected':''}>${o}</option>`).join('')}</select>`;
+    } else if(f.t==='color'){
+      const cv=val||f.def||'#000000';
+      html+=`<div class="color-field">
+        <input type="color" id="${id}-picker" value="${cv}" oninput="document.getElementById('${id}').value=this.value">
+        <input type="text" id="${id}" value="${cv}" oninput="document.getElementById('${id}-picker').value=this.value">
+      </div>`;
+    } else {
+      html+=`<input type="${f.t==='number'?'number':'text'}" id="${id}" value="${escHtml(val)}" placeholder="${escHtml(f.l)}">`;
+    }
+    html+=`</div>`;
+  });
+  return html;
+}
+
+// ── CONFIRM MAPPING ──────────────────────────────────────
+function confirmMapping(){
+  if(!activeSec)return;
+  const sec=sections.find(s=>s.id===activeSec);
+
+  // Update label
+  const labelEl=document.getElementById('ed-sec-label');
+  if(labelEl)sec.label=labelEl.value;
+
+  // Widget
+  const selBtn=document.querySelector('#widget-grid .wbtn.sel');
+  if(!selBtn){alert('Selecciona un widget');return;}
+  const wid=selBtn.dataset.wid;
+
+  // Fields
+  const fields={};
+  const fieldDefs=WIDGET_FIELDS[wid]||[];
+  fieldDefs.forEach(f=>{
+    const el=document.getElementById('ef-'+f.k);
+    if(el)fields[f.k]=el.value;
+  });
+
+  // Container settings
+  const bgColor=document.getElementById('ed-bg-picker')?.value||'#FFFFFF';
+  const padding=document.getElementById('ed-padding')?.value||'80 60 80 60';
+  const layout=document.getElementById('ed-direction')?.value||'column';
+  const minH=document.getElementById('ed-minheight')?.value||'';
+
+  mappings[activeSec]={widget:wid,fields,bg_color:bgColor,padding,layout,min_height:minH};
+
+  renderSections();
+  openSection(activeSec);
+}
+
+function removeMapping(){
+  if(!activeSec)return;
+  delete mappings[activeSec];
+  renderSections();
+  openSection(activeSec);
+}
+
+// ── PROGRESS & MAPPED LIST ───────────────────────────────
+function updateProgress(){
+  const total=sections.length;
+  const done=Object.keys(mappings).length;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('progress-fill').style.width=pct+'%';
+  document.getElementById('progress-text').textContent=`${done} de ${total} mapeadas`;
+  document.getElementById('progress-pct').textContent=pct+'%';
+  document.getElementById('btn-export').disabled=done===0;
+  document.getElementById('header-status').textContent=done>0?`${done}/${total} secciones`:'';
+}
+
+function updateMappedList(){
+  const el=document.getElementById('mapped-items');
+  const entries=Object.entries(mappings);
+  if(!entries.length){el.innerHTML='<div class="mapped-empty">Ninguna sección mapeada aún</div>';return;}
+  el.innerHTML=entries.map(([secId,m])=>{
+    const sec=sections.find(s=>s.id===secId);
+    const wl=WIDGETS.find(w=>w.id===m.widget)?.label||m.widget;
+    return `<div class="mapped-item" onclick="openSection('${secId}')" style="cursor:pointer;">
+      <i class="fa-solid fa-circle-check"></i>
+      <span class="mi-name">${escHtml(sec?.label||secId)}</span>
+      <span class="mi-widget">${wl}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── BUILD ELEMENTOR JSON ─────────────────────────────────
+function buildWidgetNode(wid, fields, label){
+  const s={};
+  switch(wid){
+    case 'heading':
+      s.title=fields.title||label;
+      s.header_size=fields.tag||'h2';
+      s.align=fields.align||'left';
+      if(fields.color)s.title_color=fields.color;
+      if(fields.font_size||fields.font_family||fields.font_weight){
+        s.typography_typography='custom';
+        if(fields.font_family)s.typography_font_family=fields.font_family;
+        if(fields.font_size)s.typography_font_size=px(fields.font_size);
+        if(fields.font_weight)s.typography_font_weight=fields.font_weight;
+      }
+      if(fields.animation)s._animation=fields.animation;
+      break;
+    case 'text-editor':
+      s.editor=fields.editor||`<p>${label}</p>`;
+      s.align=fields.align||'left';
+      if(fields.color)s.text_color=fields.color;
+      if(fields.font_size||fields.font_family||fields.font_weight){
+        s.typography_typography='custom';
+        if(fields.font_family)s.typography_font_family=fields.font_family;
+        if(fields.font_size)s.typography_font_size=px(fields.font_size);
+        if(fields.font_weight)s.typography_font_weight=fields.font_weight;
+      }
+      if(fields.animation)s._animation=fields.animation;
+      break;
+    case 'button':
+      s.text=fields.text||label;
+      s.link={url:fields.url||'#',is_external:'',nofollow:''};
+      if(fields.bg_color){s.background_color=fields.bg_color;s.background_background='classic';}
+      if(fields.text_color)s.button_text_color=fields.text_color;
+      if(fields.hover_bg)s.button_background_hover_color=fields.hover_bg;
+      if(fields.border_radius)s.border_radius=pad(Array(4).fill(fields.border_radius).join(' '));
+      if(fields.size)s.size=fields.size;
+      if(fields.align)s.align=fields.align;
+      if(fields.icon){s.selected_icon={library:'fa-solid',value:fields.icon};s.icon_align=fields.icon_align||'left';}
+      if(fields.animation)s._animation=fields.animation;
+      s.typography_typography='custom';
+      s.typography_font_family='Inter';
+      s.typography_font_size=px(15);
+      s.typography_font_weight='600';
+      break;
+    case 'image':
+      s.image={url:fields.url||'',alt:fields.alt||''};
+      if(fields.size)s.image_size=fields.size;
+      if(fields.width)s.width=px(fields.width);
+      break;
+    case 'icon':
+      s.selected_icon={library:'fa-solid',value:fields.icon_value||'fa-star'};
+      if(fields.color)s.icon_color=fields.color;
+      if(fields.size)s.size=px(fields.size);
+      break;
+    case 'icon-list':
+      s.icon_list=(fields.items||'').split('\n').filter(Boolean).map(line=>{
+        const parts=line.split('|');
+        const icon=parts[0]?.trim()||'fa-check';
+        const text=parts[1]?.trim()||icon;
+        return{text,selected_icon:{library:'fa-solid',value:icon},_id:uid()};
+      });
+      if(fields.icon_color)s.icon_color=fields.icon_color;
+      if(fields.text_color)s.text_color=fields.text_color;
+      if(fields.icon_size)s.icon_size=px(fields.icon_size);
+      if(fields.space)s.space_between=px(fields.space);
+      if(fields.layout)s.layout=fields.layout;
+      break;
+    case 'icon-box':
+      s.selected_icon={library:'fa-solid',value:fields.icon_value||'fa-star'};
+      s.title_text=fields.title||label;
+      s.description_text=fields.description||'';
+      if(fields.icon_color)s.icon_color=fields.icon_color;
+      if(fields.title_color)s.title_color=fields.title_color;
+      if(fields.desc_color)s.description_color=fields.desc_color;
+      if(fields.position)s.position=fields.position;
+      if(fields.text_align)s.text_align=fields.text_align;
+      if(fields.animation)s._animation=fields.animation;
+      break;
+    case 'counter':
+      s.starting_number=Number(fields.start||0);
+      s.ending_number=Number(fields.end||100);
+      s.suffix=fields.suffix||'';
+      s.prefix=fields.prefix||'';
+      s.title=fields.title||label;
+      if(fields.num_color)s.number_color=fields.num_color;
+      if(fields.title_color)s.title_color=fields.title_color;
+      s.text_align='center';
+      if(fields.font_size){s.typography_typography='custom';s.typography_font_size=px(fields.font_size);s.typography_font_weight='800';s.typography_font_family='Inter';}
+      if(fields.animation)s._animation=fields.animation;
+      break;
+    case 'divider':
+      if(fields.color)s.color=fields.color;
+      if(fields.weight)s.weight=px(fields.weight);
+      if(fields.width)s.width=px(fields.width);
+      if(fields.align)s.align=fields.align;
+      break;
+    case 'spacer':
+      s.space=px(fields.height||40);
+      break;
+    case 'accordion':
+      s.tabs=(fields.items||'').split('\n').filter(Boolean).map(line=>{
+        const[title,content]=line.split('|');
+        return{tab_title:title||'Item',tab_content:content||'',_id:uid()};
+      });
+      if(fields.title_color)s.title_color=fields.title_color;
+      if(fields.title_active_color)s.title_active_color=fields.title_active_color;
+      break;
+    case 'testimonial':
+      s.testimonial_content=fields.content||'';
+      s.testimonial_name=fields.name||'';
+      s.testimonial_job=fields.job||'';
+      if(fields.img_url)s.testimonial_image={url:fields.img_url};
+      if(fields.animation)s._animation=fields.animation;
+      break;
+    case 'video':
+      s.youtube_url=fields.url||'';
+      s.autoplay=fields.autoplay==='yes'?'yes':'';
+      break;
+    case 'form':
+      s.form_name=fields.form_name||label;
+      s.button_text=fields.btn_text||'Enviar';
+      s.form_fields=(fields.fields||'').split('\n').filter(Boolean).map(line=>{
+        const[type,lbl]=line.split('|');
+        return{field_type:type?.trim()||'text',field_label:lbl?.trim()||type,_id:uid(),required:'yes',width:'100'};
+      });
+      break;
+    case 'nav-menu':
+      if(fields.menu_id)s.nav_menu=fields.menu_id;
+      if(fields.layout)s.layout=fields.layout;
+      break;
+    case 'html':
+      s.html=fields.html||'';
+      break;
+  }
+  return{id:uid(),elType:'widget',widgetType:wid,settings:s,elements:[]};
+}
+
+// ── EXPORT ───────────────────────────────────────────────
+function exportJSON(){
+  const title=document.getElementById('page-title').value||'Mi página';
+  const type=document.getElementById('page-type').value||'page';
+
+  const content=sections
+    .filter(sec=>mappings[sec.id])
+    .map(sec=>{
+      const m=mappings[sec.id];
+      const containerSettings={
+        flex_direction:m.layout||'column',
+        background_background:'classic',
+        background_color:m.bg_color||'#FFFFFF',
+        padding:pad(m.padding||'80 60 80 60'),
+        content_width:'boxed',
+        boxed_width:{unit:'px',size:1240,sizes:[]},
+      };
+      if(m.layout==='row'){
+        containerSettings.flex_wrap='wrap';
+        containerSettings.flex_gap=gap(28,28);
+        containerSettings.flex_align_items='center';
+      }
+      if(m.min_height&&Number(m.min_height)>0){
+        containerSettings.min_height={unit:'px',size:Number(m.min_height),sizes:[]};
+      }
+      const widgetNode=buildWidgetNode(m.widget,m.fields||{},sec.label);
+      return{
+        id:uid(),
+        elType:'container',
+        settings:containerSettings,
+        elements:[widgetNode],
+        isInner:false,
+      };
+    });
+
+  const output={
+    version:'0.4',
+    title,
+    type,
+    content,
+    page_settings:{background_background:'classic',background_color:'#FFFFFF'},
+  };
+
+  const blob=new Blob([JSON.stringify(output,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=title.replace(/[^a-z0-9]/gi,'_').toLowerCase()+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── FILE LOAD ────────────────────────────────────────────
+function loadFile(file){
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    sections=extractSections(ev.target.result);
+    mappings={};
+    activeSec=null;
+    document.getElementById('upload-screen').style.display='none';
+    document.getElementById('sections-screen').style.display='flex';
+    document.getElementById('btn-reset').style.display='';
+    document.getElementById('file-label').textContent=file.name;
+    document.getElementById('sec-count-badge').textContent=sections.length+' secciones';
+    document.getElementById('page-title').value=file.name.replace(/\.html?$/i,'').replace(/[-_]/g,' ');
+    renderSections();
+  };
+  reader.readAsText(file);
+}
+
+function resetApp(){
+  sections=[];mappings={};activeSec=null;
+  document.getElementById('upload-screen').style.display='flex';
+  document.getElementById('sections-screen').style.display='none';
+  document.getElementById('editor-empty').style.display='flex';
+  document.getElementById('editor-panel').style.display='none';
+  document.getElementById('btn-reset').style.display='none';
+  document.getElementById('file-input').value='';
+}
+
+// ── EVENTS ───────────────────────────────────────────────
+document.getElementById('file-input').addEventListener('change',e=>{
+  if(e.target.files[0])loadFile(e.target.files[0]);
+});
+
+const dz=document.getElementById('drop-zone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{
+  e.preventDefault();dz.classList.remove('drag');
+  const f=e.dataTransfer.files[0];
+  if(f)loadFile(f);
+});
+</script>
+</body>
+</html>
